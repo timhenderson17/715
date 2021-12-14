@@ -1,0 +1,15 @@
+MWF 9:00am-9:50am 185 Nelson_Padua_Perez CMSC131
+MWF 10:00am-10:50am 232 Nelson_Padua_Perez CMSC131
+MWF 11:00am-11:50am 189 Fawzi_Emad CMSC131
+MWF 12:00pm-12:50pm 222 Fawzi_Emad CMSC131
+MWF 1:00pm-1:50pm 181 Larry_Herman CMSC132
+MWF 2:00pm-2:50pm 132 Larry_Herman CMSC132
+MWF 3:00pm-3:50pm 217 Clyde_Kruskal CMSC351
+MWF 4:00pm-4:50pm 93 Clyde Kruskal CMSC351
+MW 6:00pm-7:15pm 141 Nelson_Padua_Perez CMSC131
+TuTh 9:30am-10:45am 275 Roger_Eastman CMSC330
+TuTh 11:00am-12:15pm 283 Jose_Calderon CMSC216
+TuTh 12:30pm-1:45pm 218 Cliff_Bakalian CMSC250
+TuTh 2:00pm-3:15pm 261 Jose_Calderon CMSC216
+TuTh 3:30pm-4:45pm 287 Justin_Wyss_Gallifent CMSC250
+TuTh 5:00pm-6:15pm 296 John_Dickerson CMSC320
