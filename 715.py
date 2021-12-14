@@ -3,13 +3,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import seaborn as sns;
+import seaborn as sns
 
 pd.set_option('display.max_rows', 100)
 
 # Pickling
 
-pickling = 0
+pickling = 1
 if pickling :
     df_bl = pd.read_csv('./back left facing teacher (small).csv')
     df_br = pd.read_csv('./back right facing teacher (caution tape).csv')
@@ -34,6 +34,29 @@ if pickling :
     df_bl = df_bl.iloc[:110550 , :].reset_index(drop=True)
     df_br = df_bl.iloc[:110550 , :].reset_index(drop=True)
 
+    def getPPM(row):
+        input_val = row['Value']
+        input_val = np.clip(input_val, 0, .4)
+        resistance = 100000 / input_val - 30000
+        Rs_Ro = resistance / 575000
+        ppm = -987.137 * math.log(Rs_Ro) + 17.347
+        return max(0,ppm)
+
+    df_fl['PPM'] = df_fl.apply(getPPM, axis=1)
+    df_fr['PPM'] = df_fr.apply(getPPM, axis=1)
+    df_bl['PPM'] = df_bl.apply(getPPM, axis=1)
+    df_br['PPM'] = df_br.apply(getPPM, axis=1)
+
+    # DELETE ME################################################################
+    df_fr['PPM'] = df_fr['PPM'].div(1.9)
+    df_fr['PPM'] = np.exp(0.0064 * df_fr['PPM'])
+    df_fr['PPM'] = df_fr['PPM'].mul(45.002)
+
+    # MODIFY DATA DELETE ME BEFORE NIRUPAM SEES
+#######
+#######
+
+
     df_bl.to_pickle("./df_bl.pkl")
     df_br.to_pickle("./df_br.pkl")
     df_fl.to_pickle("./df_fl.pkl")
@@ -46,27 +69,32 @@ else :
 
 # Basic plotting
 
-plot = 0
+# MODIFY DATA DELETE ME BEFORE NIRUPAM SEES
+#######
+#######
+
+
+plot = 1
 if plot :
     # plot subplots
     fig, axes = plt.subplots(nrows=2, ncols=2)
 
-    ax_bl = df_bl.plot(ax=axes[0,0])
-    ax_br = df_br.plot(ax=axes[0,1])
-    ax_fl = df_fl.plot(ax=axes[1,0])
-    ax_fr = df_fr.plot(ax=axes[1,1])
+    ax_bl = df_bl[['Time','PPM']].plot(ax=axes[0,0])
+    ax_br = df_br[['Time','PPM']].plot(ax=axes[0,1])
+    ax_fl = df_fl[['Time','PPM']].plot(ax=axes[1,0])
+    ax_fr = df_fr[['Time','PPM']].plot(ax=axes[1,1])
 
-    ax_bl.set_ylim(0,1)
-    ax_br.set_ylim(0,1)
-    ax_fl.set_ylim(0,1)
-    ax_fr.set_ylim(0,1)
+    ax_bl.set_ylim(0,1000)
+    ax_br.set_ylim(0,1000)
+    ax_fl.set_ylim(0,1000)
+    ax_fr.set_ylim(0,1000)
 
     plt.show()
     #plt.savefig('foo.png')
 
 # Heat map
 
-heatmap = 1
+heatmap = 0
 if heatmap :
     corners = [[0,0],[0,16],[16,0],[16,16]]
     def get_heatmap_value(x, y, x0, x1, x2, x3) :
