@@ -4,12 +4,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import seaborn as sns
+import random
+from datetime import datetime, timedelta
 
 pd.set_option('display.max_rows', 100)
 
 # Pickling
 
-pickling = 1
+pickling = 0
 if pickling :
     df_bl = pd.read_csv('./back left facing teacher (small).csv')
     df_br = pd.read_csv('./back right facing teacher (caution tape).csv')
@@ -53,8 +55,8 @@ if pickling :
     df_fr['PPM'] = df_fr['PPM'].mul(45.002)
 
     # MODIFY DATA DELETE ME BEFORE NIRUPAM SEES
-#######
-#######
+    #######
+    #######
 
 
     df_bl.to_pickle("./df_bl.pkl")
@@ -69,12 +71,8 @@ else :
 
 # Basic plotting
 
-# MODIFY DATA DELETE ME BEFORE NIRUPAM SEES
-#######
-#######
 
-
-plot = 1
+plot = 0
 if plot :
     # plot subplots
     fig, axes = plt.subplots(nrows=2, ncols=2)
@@ -92,7 +90,109 @@ if plot :
     plt.show()
     #plt.savefig('foo.png')
 
+# Most Hazardous Location
+
+hazard = 1
+if hazard :
+    df_hazard = df_bl.copy()
+    df_hazard['Value'].values[:] = 0.0
+
+    def get_peak(start, end) :
+        peak_bl = df_bl.iloc[start:end][['PPM']].idxmax()
+        peak_br = df_br.iloc[start:end][['PPM']].idxmax()
+        peak_fl = df_fl.iloc[start:end][['PPM']].idxmax()
+        peak_fr = df_fr.iloc[start:end][['PPM']].idxmax()
+        return [peak_bl, peak_br, peak_fl, peak_fr]
+
+    def cost(x, y, distances) :
+        points = [[0,0,80,0],[0,0,0,60],[0,0,80,60],[80,0,0,60],[80,0,80,60],[0,60,80,60]]
+        sum = 0
+        for i in range(len(points)) :
+            a_side = math.sqrt(math.pow(x-points[i][0],2)+math.pow(y-points[i][1],2))
+            b_side = math.sqrt(math.pow(x-points[i][2],2)+math.pow(y-points[i][3],2)) - distances[i]
+            dif = math.pow(a_side - b_side,2)
+            sum += dif
+        return sum
+
+    def gradient_descent(x, y, distances, iterations = 4949, stopping_threshold = 1e-6):
+        current_x = x
+        current_y = y
+        iterations = iterations
+
+        costs = []
+        best_cost = None
+        best_x = 40
+        best_y = 30
+
+        for i in range(iterations):
+            
+            # Calculationg the current cost
+            current_cost = cost(current_x, current_y, distances)
+    
+            # If the change in cost is less than or equal to 
+            # stopping_threshold we stop the gradient descent
+            if best_cost and abs(best_cost)<=stopping_threshold:
+                break
+
+            if best_cost :
+                if current_cost < best_cost :
+                    best_cost = current_cost
+                    best_x = current_x
+                    best_y = current_y
+            else :
+                best_cost = current_cost
+    
+            costs.append(current_cost)
+            
+            # Printing the parameters for each 1000th iteration
+            # print(f"Iteration {i+1}: Cost {current_cost}, X: {current_x}, Y: {current_y}")
+
+            # Updating x and y
+            current_y = (current_y + 1) % 61 if (current_x == 80) else current_y
+            current_x = (current_x + 1) % 81
+
+        return best_x, best_y
+
+
+    T = [0,0,0,0,0,0]
+    for index, row in df_hazard.iterrows():
+        if (index > 1000 and index % 300 == 0) :
+            peaks = get_peak(index - 300, index)
+
+            k = 0
+            for i in range(1, len(peaks) - 1) :
+                for j in range(i+1, len(peaks)) :
+                    T[k] = peaks[i] - peaks[j]
+                    T[k] = T[k] * 0.07874
+                    k += 1
+
+            x, y = gradient_descent(0, 0, T)
+            print(str(index) + " " + "Most Hazardous Spot Best Estimate: " + str(x) + "," + str(y))
+            
+            df_hazard.at[index, 'x'] = x
+            df_hazard.at[index, 'y'] = y
+
+    df_hazard.to_pickle("./df_hazard_300.pkl")
+else : 
+    df_hazard = pd.read_pickle("./df_hazard_300.pkl")
+    fig, ax = plt.subplots()
+
+    def update(i) :
+        time_index = datetime(2021, 11, 15, 19, 48, 33)
+        plt.clf()
+        index = i*300 + 1200
+        time_index += timedelta(seconds=int(index*6))
+        plt.xlim(0, 60)
+        plt.ylim(0, 80)
+        plt.grid()
+        plt.title(str(time_index))
+        plt.plot(df_hazard.at[index, 'x'], df_hazard.at[index, 'y'], marker="o", markersize=20, markeredgecolor="red", markerfacecolor="green")
+    
+    anim = FuncAnimation(fig, update, frames=np.arange(0, 40), interval=200)
+    anim.save('hazard.gif', dpi=80, writer='imagemagick')
+
 # Heat map
+# deprecated delete this later
 
 heatmap = 0
 if heatmap :
