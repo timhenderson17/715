@@ -4,14 +4,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import seaborn as sns
-<<<<<<< HEAD
 import random
 from datetime import datetime, timedelta
-=======
-from datetime import datetime
-from datetime import timedelta
 import calendar
->>>>>>> 504e7dd2a537c9cd592b65e63006ee8c63ce9978
 
 pd.set_option('display.max_rows', 100)
 
