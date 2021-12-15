@@ -4,8 +4,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import seaborn as sns
+<<<<<<< HEAD
 import random
 from datetime import datetime, timedelta
+=======
+from datetime import datetime
+from datetime import timedelta
+import calendar
+>>>>>>> 504e7dd2a537c9cd592b65e63006ee8c63ce9978
 
 pd.set_option('display.max_rows', 100)
 
@@ -24,7 +30,7 @@ if pickling :
     pd.to_datetime(df_fr['Time'])
 
     # so all data starts at exact same time
-    # 7:48:33 PM
+    # 7:48:33 PM Nov 15
     df_fl = df_fl.iloc[61: , :]
     df_fr = df_fr.iloc[39: , :]
     df_bl = df_bl.iloc[14: , :]
@@ -256,4 +262,97 @@ if heatmap :
     #df['df[['ColumnName','ColumnName2','ColumnName3','ColumnName4']].apply(label)
 
 
+attendance = []
+for section in open('Month Day Year Start End Number_Of_Students.txt').read().split('\n'):
+    attendance.append(section.split())
+class_sizes = []
+classtimes = []
+abbr_to_num = {name: num for num, name in enumerate(calendar.month_abbr) if num}
+for lecture in attendance:
+    month, day, year, start, end, students = lecture
+    start = start.split(':')
+    end = end.split(":")
+    begin = datetime(int(year), abbr_to_num[month], int(day), int(start[0]), int(start[1]), 0)
+    finish = datetime(int(year), abbr_to_num[month], int(day), int(end[0]), int(end[1]), 0)
+    classtimes.append([begin, finish])
+    class_sizes.append(int(students))
 
+# 7:48:33 PM Nov 15
+# datetime(year, month, day, hour, minute, second, microsecond)
+zeroTime = datetime(2021, 11, 15, 19, 48, 33)
+def getIndex(start, end):
+    diff = end - start
+    return int(diff.total_seconds()/6)
+
+def getPeakAndAverageOfPeriod(startTime, endTime, zeroTime):
+    #bl, br, fl, fr
+    lower = getIndex(zeroTime, startTime)
+    upper = getIndex(zeroTime, endTime)
+    peak = [0.0,0.0,0.0,0.0]
+    average = [0.0,0.0,0.0,0.0]
+    bl = df_bl.values
+    br = df_br.values
+    fl = df_fl.values
+    fr = df_fr.values
+    for i in range(lower,upper+1):
+        average[0] += bl[i][2]
+        average[1] += br[i][2]
+        average[2] += fl[i][2]
+        average[3] += fr[i][2]
+        peak[0] = max(peak[0], bl[i][2])
+        peak[1] = max(peak[1], br[i][2])
+        peak[2] = max(peak[2], fl[i][2])
+        peak[3] = max(peak[3], fr[i][2])
+    for i in range(len(average)):
+        average[i] = average[i]/(upper-lower+1)
+        
+    return peak, average
+
+#class_sizes, classtimes, get firstMinutePPM in first minute and average, peak across class times
+firstMinutePPM = []
+averages = []
+peaks = []
+for classtime in classtimes:
+    start = classtime[0]
+    end = classtime[1]
+    currP, currAv = getPeakAndAverageOfPeriod(start, end, zeroTime)
+    averages.append(currAv)
+    peaks.append(currP)
+    _, firstAv = getPeakAndAverageOfPeriod(start, end+timedelta(minutes=1), zeroTime)
+    firstMinutePPM.append(firstAv)
+    """
+    print(class_sizes)
+    print(firstMinutePPM)
+    print("Averages:", averages)
+    print("Peaks:", peaks)
+    """  
+
+def knn_distance(sample1, sample2):
+    distance = 0.0
+    for i in range(len(sample1)):
+        distance += (sample1[i]-sample2[i])**2
+    return sqrt(distance)
+#feature 4 CO2 level and number_of_students -> total of 5
+# 4 CO2 levels -> those that are 1 minute before class time
+# number_of_students -> assuming full attendence for 1 minute later
+# good/bad -> decided by 4 CO2 levels average of the class time
+# kNN nearest neighbor and SVM -> anticipate the rise of CO2 levels
+knn = 1
+
+if knn:
+    negatives = []
+    positives = []
+    # class size, firstMinutePPM, true/false danger (based on averages/peaks)
+    for i in range(0, len(class_sizes)):
+        isDangerous = max(peaks[i]) >= 600  
+
+        parameters = []
+        parameters.extend([class_sizes[i]])
+        parameters.extend(firstMinutePPM[i])
+        if isDangerous:
+            positives.append((parameters,isDangerous))
+        else:
+            negatives.append((parameters,isDangerous))
+
+print(len(positives))
+print(len(negatives))    
