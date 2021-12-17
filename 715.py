@@ -162,7 +162,7 @@ if hazard :
 
 if plot :
     fig = plt.figure(figsize=(40, 20))
-    gs = GridSpec(nrows=4, ncols=5)
+    gs = GridSpec(nrows=8, ncols=5)
 
     fig.suptitle('PPM at All 4 Sensors')
 
@@ -171,24 +171,28 @@ if plot :
     ax0.set_xlabel('Time')
     ax0.set_ylabel('CO2 PPM')
     ax0.set_title('Far Left from Front')
+    plt.xticks(rotation=45, ha='right')
 
     ax1 = fig.add_subplot(gs[0, 1])
     ax_br = ax1.plot(df_br['Time'], df_br['PPM'])
     ax1.set_xlabel('Time')
     ax1.set_ylabel('CO2 PPM')
     ax1.set_title('Far Right from Front')
+    plt.xticks(rotation=45, ha='right')
 
-    ax2 = fig.add_subplot(gs[1, 0])
+    ax2 = fig.add_subplot(gs[2, 0])
     ax_fl = ax2.plot(df_fl['Time'], df_fl['PPM'])
     ax2.set_xlabel('Time')
     ax2.set_ylabel('CO2 PPM')
     ax2.set_title('Front Left from Front')
+    plt.xticks(rotation=45, ha='right')
 
-    ax3 = fig.add_subplot(gs[1, 1])
+    ax3 = fig.add_subplot(gs[2, 1])
     ax_fr = ax3.plot(df_fr['Time'], df_fr['PPM'])
     ax3.set_xlabel('Time')
     ax3.set_ylabel('CO2 PPM')
     ax3.set_title('Front Right from Front')
+    plt.xticks(rotation=45, ha='right')
 
     ax0.set_ylim(0,1000)
     ax1.set_ylim(0,1000)
@@ -197,7 +201,7 @@ if plot :
 
     # hazard plotting
     df_hazard = pd.read_pickle("./df_hazard_50.pkl")
-    ax4 = fig.add_subplot(gs[:2, 2:4])
+    ax4 = fig.add_subplot(gs[:4, 2:4])
 
     def update(i) :
         time_index = datetime(2021, 11, 15, 19, 48, 33)
@@ -213,7 +217,7 @@ if plot :
     anim = FuncAnimation(fig, update, frames=np.arange(0, 40), interval=200)
     anim.save('hazard.gif', dpi=80, writer='imagemagick')
 
-    # plt.show()
+    plt.show()
     #plt.savefig('foo.png')
 
 
