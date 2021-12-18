@@ -164,7 +164,7 @@ if plot :
     fig = plt.figure(figsize=(40, 20))
     gs = GridSpec(nrows=8, ncols=5)
 
-    fig.suptitle('PPM at All 4 Sensors')
+    fig.suptitle('Mock Dashboard')
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax_bl = ax0.plot(df_bl['Time'], df_bl['PPM'])
@@ -206,7 +206,7 @@ if plot :
     def update(i) :
         time_index = datetime(2021, 11, 15, 19, 48, 33)
         ax4.clear()
-        index = i*50 + 1200
+        index = i*50 + 6300
         time_index += timedelta(seconds=int(index*6))
         ax4.set_xlim(0, 80)
         ax4.set_ylim(0, 60)
